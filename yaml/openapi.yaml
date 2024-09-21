@@ -1,0 +1,221 @@
+openapi: 3.0.3
+info:
+  title: Dokumen API Cloud Function GIS- OpenAPI 3.0
+  description: >-
+    Dokumentasi API untuk Matakuliah GIS
+  termsOfService: https://github.com/gis-geos
+  contact:
+    email: imyharis@gmail.com
+  license:
+    name: GCF Package
+    url: https://pkg.go.dev/github.com/gis-geos/gcf
+  version: 1.0.11
+externalDocs:
+  description: Swagger
+  url: https://gis-geos.github.io/swagger/
+servers:
+  - url: https://us-central1-gcpospasial.cloudfunctions.net
+tags:
+  - name: auth
+    description: Authentikasi
+    externalDocs:
+      description: Deskripsi dan Kode Program
+      url: https://github.com/gis-geos/gcf
+  - name: register
+    description: Register Account
+    externalDocs:
+      description: Deskripsi dan Kode Program
+      url: https://github.com/gis-geos/gcf
+  - name: data
+    description: Data Untuk akses GIS
+    externalDocs:
+      description: Deskripsi dan Kode Program
+      url: https://github.com/gis-geos/gcf
+paths:
+  /RegisterGis:
+    post:
+      tags:
+        - register
+      summary: Register User Without Token
+      description: Daftar Akun User
+      operationId: authService
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '405':
+          description: Invalid input
+  /login-gis:
+    post:
+      tags:
+        - auth
+      summary: Login get Token
+      description: Login and Get User Token
+      operationId: authService
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Auth'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '405':
+          description: Invalid input
+  /UpdateGeo:
+    put:
+      tags:
+        - data
+      summary: Update data geo
+      description: Update data nama by volume geo
+      operationId: authService
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bodycord'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '405':
+          description: Invalid input          
+      security:
+        - Login:
+          - write:apiKey
+          - read:apiKey
+
+  /GetAllGeo:
+    get:
+      tags:
+        - data
+      summary: Get Data Geojson
+      description: Header auth 
+      operationId: GetdataGeojson
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/responseUser'
+        '400':
+          description: Invalid status value
+      security:
+        - Login:
+          - write:apiKey
+          - read:apiKey
+
+components:
+  schemas:
+    user:
+      type: object
+      properties:
+        username:
+          type: string
+          example : haris
+        password:
+          type: string
+          example: haris
+    Response:
+      type: object
+      properties:
+        status:
+          type: bool
+          example: true
+        message:
+          type: string
+          example: Berhasil Input data
+    responseUser:
+      type: object
+      properties:
+        status:
+          type: bool
+          example: true
+        message:
+          type: string
+          example: berhasil ambil data
+        data:
+          type: object
+          properties:
+            username:
+              type: string
+              example: haris
+            password:
+              type: string
+              example: hashed password
+            role:
+              type: string
+              example: user
+    Auth:
+      type: object
+      properties:
+        username:
+          type: string
+          example: haris
+        password:
+          type: string
+          example: haris
+    bodycord:
+      type: object
+      properties:
+        type:
+          type: string
+          example: polygon
+        name:
+          type: string
+          example: haris
+        volume:
+          type: string
+          example: "1"
+    AuthResponse:
+      type: object
+      properties:
+        status:
+          type: bool
+          example: false
+        message:
+          type: string
+          example: Selamat Datang
+        token:
+          type: string
+          example: haris
+  requestBodies:
+    AuthReq:
+      description: Request Authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Auth'
+    UserArray:
+      description: List of user object
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AuthResponse'
+  securitySchemes:
+    Login:
+      type: apiKey
+      name: Login
+      in: header
+
+      
